@@ -1,0 +1,133 @@
+{
+    "bridge": {
+        "name": "Homebridge SolarEdge",
+        "username": "0F:A9:51:57:4E:4D",
+        "port": 51191,
+        "pin": "579-34-067"
+    },
+    "accessories": [],
+    "platforms": [
+        {
+            "platform": "Modbus",
+            "name": "Modbus",
+            "ip": "192.168.1.39",
+            "port": "1502",
+            "pollFrequency": 5000,
+            "accessories": [
+                {
+                    "name": "SolarEdge",
+                    "type": "Thermostat",
+                    "On": {
+                        "address": "r40108",
+                        "readonly": true,
+                        "map": {
+                            "1": 0,
+                            "2": 0,
+                            "3": 0,
+                            "4": 1,
+                            "5": 1,
+                            "6": 0,
+                            "7": 0,
+                            "8": 0
+                        }
+                    },
+                    "CurrentHeatingCoolingState": {
+                        "address": "r40108",
+                        "readonly": true,
+                        "validValues": [
+                            0,
+                            1,
+                            2
+                        ],
+                        "map": {
+                            "1": 0,
+                            "2": 0,
+                            "3": 0,
+                            "4": 2,
+                            "5": 1,
+                            "6": 0,
+                            "7": 0,
+                            "8": 0
+                        }
+                    },
+                    "CurrentTemperature": {
+                        "address": "r40104",
+                        "maxValue": 100,
+                        "readonly": true,
+                        "correction": "/100"
+                    },
+                    "TargetTemperature": {
+                        "value": 0
+                    }
+                },
+                {
+                    "name": "SolarEdge AC",
+                    "type": "Outlet",
+                    "subtype": "AC",
+                    "On": {
+                        "address": "r40108",
+                        "readonly": true,
+                        "map": {
+                            "1": 0,
+                            "2": 0,
+                            "3": 0,
+                            "4": 1,
+                            "5": 1,
+                            "6": 0,
+                            "7": 0,
+                            "8": 0
+                        }
+                    },"Watt": {
+                        "address": "r40084",
+                        "readonly": true,
+                        "correction": "/10"
+                    },
+                    "Volt": {
+                        "address": "r40077",
+                        "readonly": true,
+                        "correction": "/10"
+                    },
+                    "Ampere": {
+                        "address": "r40072",
+                        "readonly": true,
+                        "correction": "/100"
+                    }
+                },
+                {
+                    "name": "SolarEdge DC",
+                    "type": "Outlet",
+                    "subtype": "DC",
+                    "On": {
+                        "address": "r40108",
+                        "readonly": true,
+                        "map": {
+                            "1": 0,
+                            "2": 0,
+                            "3": 0,
+                            "4": 1,
+                            "5": 1,
+                            "6": 0,
+                            "7": 0,
+                            "8": 0
+                        }
+                    },
+                    "Watt": {
+                        "address": "r40101",
+                        "readonly": true,
+                        "correction": "/10"
+                    },
+                    "Volt": {
+                        "address": "r40099",
+                        "readonly": true,
+                        "correction": "/10"
+                    },
+                    "Ampere": {
+                        "address": "r40097",
+                        "readonly": true,
+                        "correction": "/1000"
+                    }
+                }
+            ]
+        }
+    ]
+}
