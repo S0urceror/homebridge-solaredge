@@ -1,5 +1,5 @@
 {
-  "pluginAlias": "ExampleHomebridgePlugin",
+  "pluginAlias": "SolarEdge",
   "pluginType": "platform",
   "singular": true,
   "schema": {
@@ -9,7 +9,84 @@
         "title": "Name",
         "type": "string",
         "required": true,
-        "default": "Example Dynamic Platform"
+        "default": "My Solaredge inverter"
+      },
+      "manufacturer": {
+        "title": "Manufacturer",
+        "type": "string",
+        "required": true,
+        "default": "SolarEdge"
+      },
+      "model": {
+        "title": "Model",
+        "type": "string",
+        "required": true,
+        "default": "SE2200H"
+      },
+      "serial": {
+        "title": "Serial",
+        "type": "string",
+        "required": true,
+        "default": "12345"
+      },
+      "ip": {
+        "title": "IP",
+        "type": "string",
+        "required": true,
+        "default": "192.168.1.x"
+      },
+      "port": {
+        "title": "Port",
+        "type": "integer",
+        "required": true,
+        "default": 1502
+      },
+      "pollFrequency": {
+        "title": "Poll interval in msecs",
+        "type": "integer",
+        "required": true,
+        "default": 5000
+      },
+      "mqttServer": {
+        "title": "MQTT server hostname",
+        "type": "string",
+        "required": false,
+        "default": "mqtt://hostname.lan"
+      },
+      "devices": {
+        "title": "List of devices",
+        "type": "array",
+        "items": {
+          "title": "Device",
+          "type": "object",
+          "properties": {
+            "name": {
+              "title": "Name",
+              "type": "string",
+              "required": true,
+              "default": "Unique name"
+            },
+            "type": {
+              "title": "Type",
+              "type": "string",
+              "required": true,
+              "oneOf": [
+                {
+                  "title": "Temperature",
+                  "enum": [ "state" ]
+                },
+                {
+                  "title": "Alternating Current",
+                  "enum": [ "AC" ]
+                },
+                {
+                  "title": "Direct Current",
+                  "enum": [ "DC" ]
+                }
+              ]
+            }
+          }
+        }
       }
     }
   }

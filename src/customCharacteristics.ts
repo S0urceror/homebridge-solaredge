@@ -23,7 +23,7 @@ export class Volt extends Characteristic {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore: custom unit
       unit: 'V',
-      format: Formats.UINT16,
+      format: Formats.FLOAT,
       perms: [Perms.PAIRED_READ, Perms.NOTIFY],
     });
   }
@@ -36,7 +36,7 @@ export class Ampere extends Characteristic {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore: custom unit
       unit: 'A',
-      format: Formats.UINT16,
+      format: Formats.FLOAT,
       perms: [Perms.PAIRED_READ, Perms.NOTIFY],
     });
   }

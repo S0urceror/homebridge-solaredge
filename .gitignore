@@ -1,6 +1,10 @@
 # Ignore compiled code
 dist
 
+# local (debug) environment
+debug-config
+.DS_Store
+
 # ------------- Defaults ------------- #
 
 # Logs

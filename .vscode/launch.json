@@ -25,7 +25,8 @@
             "env": {
                 "DEBUG": "*"
             },
-            "preLaunchTask": "${defaultBuildTask}"
+            "preLaunchTask": "${defaultBuildTask}",
+            "internalConsoleOptions": "openOnSessionStart"
         }
     ]
 }

@@ -39,6 +39,8 @@
   },
   "dependencies": {
     "fakegato-history": "^0.6.1",
-    "jsmodbus": "^4.0.5"
+    "jsmodbus": "^4.0.5",
+    "mqtt": "^4.2.6",
+    "serialport": "^9.0.7"
   }
 }
