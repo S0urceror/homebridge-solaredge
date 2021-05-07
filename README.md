@@ -54,3 +54,10 @@ See below an example configuration:
 ## Optionally MQTT
 
 It is possible to specify a MQTT server to push the latest values to. This way you can for example display the actual values to a dashboard like Grafana. I leave that to you to figure out.
+
+Subscribe to one of the following channels to get the current value:
+```
+SolarEdge/Temperature
+SolarEdge/DCPower
+SolarEdge/ACPower
+```

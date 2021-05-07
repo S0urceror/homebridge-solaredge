@@ -143,8 +143,26 @@ export class SolarEdgeEnergyAccessory {
       // reset kWh meter every day
       const mytime = new Date();
       if (mytime.getHours()==0 && mytime.getMinutes()==0 && mytime.getSeconds()<=this.platform.config.pollFrequency/1000) {
+        // update mqtt with daily totals
+        if (this.platform.mqttclient) {
+          if (this.acdc == "AC") {
+            this.platform.mqttclient.publish ("SolarEdge/ACPowerDaily",this.kWh.toString());
+          } else {
+            this.platform.mqttclient.publish ("SolarEdge/DCPowerDaily",this.kWh.toString());
+          }
+        }
         this.resetDate = mytime;
         this.kWh = 0;
+      }
+      if (mytime.getMinutes()==0 && mytime.getSeconds()<=this.platform.config.pollFrequency/1000) {
+        // update mqtt with hourly increments
+        if (this.platform.mqttclient) {
+          if (this.acdc == "AC") {
+            this.platform.mqttclient.publish ("SolarEdge/ACPowerHourly",this.kWh.toString());
+          } else {
+            this.platform.mqttclient.publish ("SolarEdge/DCPowerHourly",this.kWh.toString());
+          }
+        }
       }
 
       if (this.acdc=="AC") {
