@@ -1,6 +1,6 @@
-import { Service, PlatformAccessory, CharacteristicValue, Characteristic } from 'homebridge';
+import { PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { ModbusHomebridgePlatform } from './platform';
-import { CurrentPowerConsumption, TotalPowerConsumption, ResetTotalPowerConsumption, Volt,Ampere } from './customCharacteristics';
+import { CurrentPowerConsumption, TotalPowerConsumption, ResetTotalPowerConsumption, Volt, Ampere } from './customCharacteristics';
 
 /**
  * Platform Accessory
@@ -28,7 +28,8 @@ export class SolarEdgeStateAccessory {
 
     // get the TemperatureSensor service if it exists, otherwise create a new TemperatureSensor service
     // you can create multiple services for each accessory
-    this.temperatureService = this.accessory.getService(this.platform.Service.TemperatureSensor) || this.accessory.addService(this.platform.Service.TemperatureSensor);
+    this.temperatureService = this.accessory.getService(this.platform.Service.TemperatureSensor) ||
+                              this.accessory.addService(this.platform.Service.TemperatureSensor);
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
@@ -38,11 +39,11 @@ export class SolarEdgeStateAccessory {
     // see https://developers.homebridge.io/#/service/CurrentTemperature
 
     this.temperatureService.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
-        .onGet(this.getCurrentTemperature.bind(this));
+      .onGet(this.getCurrentTemperature.bind(this));
 
     // Add FakeGato history service
-    this.historyService = new this.platform.FakeGatoHistoryService ("weather",this.accessory,{log:this.platform.log});
-    
+    this.historyService = new this.platform.FakeGatoHistoryService ('weather', this.accessory, {log:this.platform.log});
+
     setInterval(() => {
       const moment = Math.round(new Date().valueOf() / 1000);
       const temp = this.platform.modbus_values[40103-this.platform.sunspec_inverter_start]/100;
@@ -51,7 +52,7 @@ export class SolarEdgeStateAccessory {
 
       // update mqtt
       if (this.platform.mqttclient) {
-        this.platform.mqttclient.publish ("SolarEdge/Temperature",temp.toString());
+        this.platform.mqttclient.publish ('SolarEdge/Temperature', temp.toString());
       }
     }, 10000);
   }
@@ -77,13 +78,13 @@ export class SolarEdgeStateAccessory {
 export class SolarEdgeEnergyAccessory {
   private historyService;
   private outletService;
-  private kWh:number = 0.00;
+  private kWh = 0.00;
 
   constructor(
     private readonly platform: ModbusHomebridgePlatform,
     private readonly accessory: PlatformAccessory,
-    private readonly acdc: String,
-    private resetDate: Date = new Date()
+    private readonly acdc: string,
+    private resetDate: Date = new Date(),
   ) {
 
     // set accessory information
@@ -119,7 +120,7 @@ export class SolarEdgeEnergyAccessory {
       .onGet(this.getAmpere.bind(this));       // GET - bind to the 'getAmpere` method below
 
     // Add FakeGato history service
-    this.historyService = new this.platform.FakeGatoHistoryService ("energy",this.accessory,{log:this.platform.log,storage:'fs'});
+    this.historyService = new this.platform.FakeGatoHistoryService ('energy', this.accessory, {log:this.platform.log, storage:'fs'});
 
     /**
      * Updating characteristics values asynchronously.
@@ -138,26 +139,28 @@ export class SolarEdgeEnergyAccessory {
       // check if inverter is in normal operating state or throttling (clipping)
       const onvalue = this.platform.modbus_values[40107-this.platform.sunspec_inverter_start];
       const isOn:boolean = onvalue==4 || onvalue==5;
-      this.outletService.updateCharacteristic(this.platform.Characteristic.On,isOn);
-      
+      this.outletService.updateCharacteristic(this.platform.Characteristic.On, isOn);
+
       // reset kWh meter every day
       const mytime = new Date();
       if (mytime.getHours()==0 && mytime.getMinutes()==0 && mytime.getSeconds()<=this.platform.config.pollFrequency/1000) {
         // update mqtt with daily totals
-        if (this.platform.mqttclient)
-          this.platform.mqttclient.publish ("SolarEdge/"+this.acdc+"PowerDaily",this.kWh.toString());
+        if (this.platform.mqttclient) {
+          this.platform.mqttclient.publish ('SolarEdge/'+this.acdc+'PowerDaily', this.kWh.toString());
+        }
 
         this.resetDate = mytime;
         this.kWh = 0;
       }
       if (mytime.getMinutes()==0 && mytime.getSeconds()<=this.platform.config.pollFrequency/1000) {
         // update mqtt with hourly increments
-        if (this.platform.mqttclient)
-          this.platform.mqttclient.publish ("SolarEdge/"+this.acdc+"PowerHourly",this.kWh.toString());
-  
+        if (this.platform.mqttclient) {
+          this.platform.mqttclient.publish ('SolarEdge/'+this.acdc+'PowerHourly', this.kWh.toString());
+        }
+
       }
 
-      if (this.acdc=="AC") {
+      if (this.acdc=='AC') {
         // collect all specific AC values
         // power
         const wsf:number = this.platform.modbus_values[40084-this.platform.sunspec_inverter_start];
@@ -165,8 +168,8 @@ export class SolarEdgeEnergyAccessory {
         this.outletService.updateCharacteristic(CurrentPowerConsumption, watt);
         this.historyService.addEntry ({time:moment, power: watt});
         // calculate kWh produced this polling time
-        this.kWh += watt/(60*60*1000/this.platform.config.pollFrequency)/1000;     
-        this.outletService.updateCharacteristic(TotalPowerConsumption, this.kWh);   
+        this.kWh += watt/(60*60*1000/this.platform.config.pollFrequency)/1000;
+        this.outletService.updateCharacteristic(TotalPowerConsumption, this.kWh);
         // voltage
         const vsf:number = this.platform.modbus_values[40082-this.platform.sunspec_inverter_start];
         const volt = this.platform.modbus_values[40076-this.platform.sunspec_inverter_start]*Math.pow(10, vsf-65536);
@@ -177,7 +180,7 @@ export class SolarEdgeEnergyAccessory {
         this.outletService.updateCharacteristic(Ampere, ampere);
         // update mqtt
         if (this.platform.mqttclient) {
-          this.platform.mqttclient.publish ("SolarEdge/ACPower",watt.toString());
+          this.platform.mqttclient.publish ('SolarEdge/ACPower', watt.toString());
         }
       } else {
         // collect all specific DC values
@@ -187,19 +190,19 @@ export class SolarEdgeEnergyAccessory {
         this.outletService.updateCharacteristic(CurrentPowerConsumption, watt);
         this.historyService.addEntry ({time:moment, power: watt});
         // calculate kWh produced this polling time
-        this.kWh += watt/(60*60*1000/this.platform.config.pollFrequency)/1000;     
-        this.outletService.updateCharacteristic(TotalPowerConsumption, this.kWh);   
+        this.kWh += watt/(60*60*1000/this.platform.config.pollFrequency)/1000;
+        this.outletService.updateCharacteristic(TotalPowerConsumption, this.kWh);
         // voltage
         const vsf:number = this.platform.modbus_values[40099-this.platform.sunspec_inverter_start];
         const volt = this.platform.modbus_values[40098-this.platform.sunspec_inverter_start]*Math.pow(10, vsf-65536);
         this.outletService.updateCharacteristic(Volt, volt);
         // ampere
-        const asf:number = this.platform.modbus_values[40097-this.platform.sunspec_inverter_start]
+        const asf:number = this.platform.modbus_values[40097-this.platform.sunspec_inverter_start];
         const ampere = this.platform.modbus_values[40096-this.platform.sunspec_inverter_start]*Math.pow(10, asf-65536);
         this.outletService.updateCharacteristic(Ampere, ampere);
         // update mqtt
         if (this.platform.mqttclient) {
-          this.platform.mqttclient.publish ("SolarEdge/DCPower",watt.toString());
+          this.platform.mqttclient.publish ('SolarEdge/DCPower', watt.toString());
         }
       }
     }, this.platform.config.pollFrequency);
@@ -226,47 +229,52 @@ export class SolarEdgeEnergyAccessory {
   }
 
   async getWatt(): Promise<CharacteristicValue> {
-    const wsf:number = this.acdc=="AC" ? 
+    const wsf:number = this.acdc=='AC' ?
       this.platform.modbus_values[40084-this.platform.sunspec_inverter_start]:
       this.platform.modbus_values[40101-this.platform.sunspec_inverter_start];
-    const watt = this.acdc=="AC" ? 
+    const watt = this.acdc=='AC' ?
       this.platform.modbus_values[40083-this.platform.sunspec_inverter_start]*Math.pow(10, wsf-65536):
       this.platform.modbus_values[40100-this.platform.sunspec_inverter_start]*Math.pow(10, wsf-65536);
     this.platform.log.debug('Get Characteristic Watt ->', watt);
     return watt;
   }
+
   async getEnergy(): Promise<CharacteristicValue> {
     const energy = this.kWh;
     this.platform.log.debug('Get Characteristic Energy ->', energy);
     return energy;
   }
+
   async getVoltage(): Promise<CharacteristicValue> {
-    const vsf:number = this.acdc=="AC" ? 
+    const vsf:number = this.acdc=='AC' ?
       this.platform.modbus_values[40082-this.platform.sunspec_inverter_start]:
-      this.platform.modbus_values[40099-this.platform.sunspec_inverter_start];    
-    const volt = this.acdc=="AC" ? 
+      this.platform.modbus_values[40099-this.platform.sunspec_inverter_start];
+    const volt = this.acdc=='AC' ?
       this.platform.modbus_values[40076-this.platform.sunspec_inverter_start]*Math.pow(10, vsf-65536):
       this.platform.modbus_values[40098-this.platform.sunspec_inverter_start]*Math.pow(10, vsf-65536);
     this.platform.log.debug('Get Characteristic Voltage ->', volt);
     return volt;
-  }  
+  }
+
   async getAmpere(): Promise<CharacteristicValue> {
-    const asf:number = this.acdc=="AC" ? 
+    const asf:number = this.acdc=='AC' ?
       this.platform.modbus_values[40075-this.platform.sunspec_inverter_start] :
       this.platform.modbus_values[40097-this.platform.sunspec_inverter_start];
-    const ampere = this.acdc=="AC" ? 
+    const ampere = this.acdc=='AC' ?
       this.platform.modbus_values[40071-this.platform.sunspec_inverter_start]*Math.pow(10, asf-65536):
       this.platform.modbus_values[40096-this.platform.sunspec_inverter_start]*Math.pow(10, asf-65536);
     this.platform.log.debug('Get Characteristic Ampere ->', ampere);
     return ampere;
   }
+
   async getResetEnergy(): Promise<CharacteristicValue> {
-    var secs_since_epoch:number = Math.round(this.resetDate.getTime()/1000);
-    var secs_since_eve:number = Math.round(new Date ('2001-01-01T00:00:00Z').getTime()/1000);
+    const secs_since_epoch:number = Math.round(this.resetDate.getTime()/1000);
+    const secs_since_eve:number = Math.round(new Date ('2001-01-01T00:00:00Z').getTime()/1000);
     const resetenergy = secs_since_epoch - secs_since_eve;
     this.platform.log.debug('Get Characteristic Reset Energy ->', resetenergy);
     return resetenergy;
   }
+
   async setResetEnergy(value: CharacteristicValue): Promise<void> {
     this.kWh = 0;
     this.resetDate = new Date();
