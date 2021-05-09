@@ -138,12 +138,12 @@ export class SolarEdgeEnergyAccessory {
 
       // check if inverter is in normal operating state or throttling (clipping)
       const onvalue = this.platform.modbus_values[40107-this.platform.sunspec_inverter_start];
-      const isOn:boolean = onvalue==4 || onvalue==5;
+      const isOn:boolean = (onvalue===4 || onvalue===5);
       this.outletService.updateCharacteristic(this.platform.Characteristic.On, isOn);
 
       // reset kWh meter every day
       const mytime = new Date();
-      if (mytime.getHours()==0 && mytime.getMinutes()==0 && mytime.getSeconds()<=this.platform.config.pollFrequency/1000) {
+      if (mytime.getHours()===0 && mytime.getMinutes()===0 && mytime.getSeconds()<(this.platform.config.pollFrequency/1000)) {
         // update mqtt with daily totals
         if (this.platform.mqttclient) {
           this.platform.mqttclient.publish ('SolarEdge/'+this.acdc+'PowerDaily', this.kWh.toString());
@@ -152,7 +152,7 @@ export class SolarEdgeEnergyAccessory {
         this.resetDate = mytime;
         this.kWh = 0;
       }
-      if (mytime.getMinutes()==0 && mytime.getSeconds()<=this.platform.config.pollFrequency/1000) {
+      if (mytime.getMinutes()===0 && mytime.getSeconds()<(this.platform.config.pollFrequency/1000)) {
         // update mqtt with hourly increments
         if (this.platform.mqttclient) {
           this.platform.mqttclient.publish ('SolarEdge/'+this.acdc+'PowerHourly', this.kWh.toString());
@@ -160,7 +160,7 @@ export class SolarEdgeEnergyAccessory {
 
       }
 
-      if (this.acdc=='AC') {
+      if (this.acdc==='AC') {
         // collect all specific AC values
         // power
         const wsf:number = this.platform.modbus_values[40084-this.platform.sunspec_inverter_start];
@@ -223,16 +223,16 @@ export class SolarEdgeEnergyAccessory {
    */
   async getOn(): Promise<CharacteristicValue> {
     const onvalue = this.platform.modbus_values[40107-this.platform.sunspec_inverter_start];
-    const isOn:boolean = onvalue==4 || onvalue==5;
+    const isOn:boolean = (onvalue===4 || onvalue===5);
     this.platform.log.debug('Get Characteristic On ->', isOn);
     return isOn;
   }
 
   async getWatt(): Promise<CharacteristicValue> {
-    const wsf:number = this.acdc=='AC' ?
+    const wsf:number = this.acdc==='AC' ?
       this.platform.modbus_values[40084-this.platform.sunspec_inverter_start]:
       this.platform.modbus_values[40101-this.platform.sunspec_inverter_start];
-    const watt = this.acdc=='AC' ?
+    const watt = this.acdc==='AC' ?
       this.platform.modbus_values[40083-this.platform.sunspec_inverter_start]*Math.pow(10, wsf-65536):
       this.platform.modbus_values[40100-this.platform.sunspec_inverter_start]*Math.pow(10, wsf-65536);
     this.platform.log.debug('Get Characteristic Watt ->', watt);
@@ -246,10 +246,10 @@ export class SolarEdgeEnergyAccessory {
   }
 
   async getVoltage(): Promise<CharacteristicValue> {
-    const vsf:number = this.acdc=='AC' ?
+    const vsf:number = this.acdc==='AC' ?
       this.platform.modbus_values[40082-this.platform.sunspec_inverter_start]:
       this.platform.modbus_values[40099-this.platform.sunspec_inverter_start];
-    const volt = this.acdc=='AC' ?
+    const volt = this.acdc==='AC' ?
       this.platform.modbus_values[40076-this.platform.sunspec_inverter_start]*Math.pow(10, vsf-65536):
       this.platform.modbus_values[40098-this.platform.sunspec_inverter_start]*Math.pow(10, vsf-65536);
     this.platform.log.debug('Get Characteristic Voltage ->', volt);
@@ -257,10 +257,10 @@ export class SolarEdgeEnergyAccessory {
   }
 
   async getAmpere(): Promise<CharacteristicValue> {
-    const asf:number = this.acdc=='AC' ?
+    const asf:number = this.acdc==='AC' ?
       this.platform.modbus_values[40075-this.platform.sunspec_inverter_start] :
       this.platform.modbus_values[40097-this.platform.sunspec_inverter_start];
-    const ampere = this.acdc=='AC' ?
+    const ampere = this.acdc==='AC' ?
       this.platform.modbus_values[40071-this.platform.sunspec_inverter_start]*Math.pow(10, asf-65536):
       this.platform.modbus_values[40096-this.platform.sunspec_inverter_start]*Math.pow(10, asf-65536);
     this.platform.log.debug('Get Characteristic Ampere ->', ampere);
@@ -275,7 +275,7 @@ export class SolarEdgeEnergyAccessory {
     return resetenergy;
   }
 
-  async setResetEnergy(value: CharacteristicValue): Promise<void> {
+  async setResetEnergy(_value: CharacteristicValue): Promise<void> {
     this.kWh = 0;
     this.resetDate = new Date();
     this.platform.log.debug('Reset Characteristic Reset Energy');
