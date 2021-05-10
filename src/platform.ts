@@ -87,6 +87,7 @@ export class ModbusHomebridgePlatform implements DynamicPlatformPlugin {
     this.log.debug('Finished initializing platform:', this.config.name);
   }
 
+
   modbus_update (platform:ModbusHomebridgePlatform) {
     platform.modbus_client.readHoldingRegisters(platform.sunspec_inverter_start, this.sunspec_inverter_end-this.sunspec_inverter_start)
       .then(({ request, response }) => {
